@@ -91,8 +91,10 @@ jobs:
         run: |
           image=$(yq eval '.image' ./${{ matrix.addon }}/build.yaml)
           arch=$(yq eval '.arch' ./${{ matrix.addon }}/build.yaml | yq eval 'to_entries | map(.value)' - | tr '\n' ' ')
+          version=$(yq eval '.version' ./${{ matrix.addon }}/build.yaml)
           echo "image=$image" >> $GITHUB_OUTPUT
           echo "arch=$arch" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Check if add-on should be built
         id: check
@@ -102,15 +104,17 @@ jobs:
             echo "build_arch=false" >> $GITHUB_OUTPUT;
           else
             build_arch=false
+            current_arch=""
             for arch_item in ${{ steps.info.outputs.arch }}; do
               if [[ "$arch_item" == "${{ matrix.arch }}" ]]; then
+                current_arch="$arch_item"
                 build_arch=true
                 break
               fi
             done
             if $build_arch; then
               echo "build_arch=true" >> $GITHUB_OUTPUT;
-              echo "image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f3)" >> $GITHUB_OUTPUT;
+              echo "image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f2 | sed 's#{arch}#$current_arch#')" >> $GITHUB_OUTPUT;
               if [[ -z "${{ github.head_ref }}" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
                   echo "BUILD_ARGS=" >> $GITHUB_ENV;
               fi
@@ -135,8 +139,8 @@ jobs:
           file: ./${{ matrix.addon }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
           tags: |
-            ${{ steps.check.outputs.image }}:${{ matrix.arch }}
-            ${{ steps.check.outputs.image }}:latest-${{ matrix.arch }}
+            ${{ steps.check.outputs.image }}:latest
+            ${{ steps.check.outputs.image }}:${{ steps.info.outputs.version }}
           push: ${{ env.BUILD_ARGS != '--test' }}
 
       - name: Login to GitHub Container Registry
