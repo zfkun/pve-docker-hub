@@ -114,7 +114,8 @@ jobs:
             done
             if $build_arch; then
               echo "build_arch=true" >> $GITHUB_OUTPUT;
-              echo "image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f2 | sed 's#{arch}#${current_arch}#')" >> $GITHUB_OUTPUT;
+              image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f2 | sed 's#{arch}#$current_arch#')
+              echo "image=$image" >> $GITHUB_OUTPUT;
               if [[ -z "${{ github.head_ref }}" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
                   echo "BUILD_ARGS=" >> $GITHUB_ENV;
               fi
