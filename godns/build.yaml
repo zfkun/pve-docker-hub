@@ -4,3 +4,4 @@ arch:
   - amd64
 args:
   GODNS_VERSION: 3.2.3
+test: 1
