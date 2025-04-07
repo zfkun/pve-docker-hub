@@ -78,12 +78,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4.2.2
+      
+      - name: Install yq
+        uses: mikefarah/yq@v4.34.1
+        with:
+          cmd: install v4
 
       - name: Get information
         id: info
         run: |
-          image=$(grep -oP '(?<=image: ).*' ./${{ matrix.addon }}/build.yaml || echo "null")
-          arch=$(grep -oP '(?<=arch: \[).*(?=\])' ./${{ matrix.addon }}/build.yaml || echo "null")
+          image=$(yq eval '.image' ./${{ matrix.addon }}/build.yaml)
+          arch=$(yq eval '.arch' ./${{ matrix.addon }}/build.yaml | yq eval 'to_entries | map(.value)' - | tr '\n' ' ')
           echo "image=$image" >> $GITHUB_OUTPUT
           echo "arch=$arch" >> $GITHUB_OUTPUT
 
@@ -93,15 +98,24 @@ jobs:
           if [[ "${{ steps.info.outputs.image }}" == "null" ]]; then
             echo "Image property is not defined, skipping build"
             echo "build_arch=false" >> $GITHUB_OUTPUT;
-          elif [[ "${{ steps.info.outputs.arch }}" =~ ${{ matrix.arch }} ]]; then
-            echo "build_arch=true" >> $GITHUB_OUTPUT;
-            echo "image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f3)" >> $GITHUB_OUTPUT;
-            if [[ -z "${{ github.head_ref }}" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
-                echo "BUILD_ARGS=" >> $GITHUB_ENV;
-            fi
           else
-            echo "${{ matrix.arch }} is not a valid arch for ${{ matrix.addon }}, skipping build";
-            echo "build_arch=false" >> $GITHUB_OUTPUT;
+            build_arch=false
+            for arch_item in ${{ steps.info.outputs.arch }}; do
+              if [[ "$arch_item" == "${{ matrix.arch }}" ]]; then
+                build_arch=true
+                break
+              fi
+            done
+            if $build_arch; then
+              echo "build_arch=true" >> $GITHUB_OUTPUT;
+              echo "image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f3)" >> $GITHUB_OUTPUT;
+              if [[ -z "${{ github.head_ref }}" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
+                  echo "BUILD_ARGS=" >> $GITHUB_ENV;
+              fi
+            else
+              echo "${{ matrix.arch }} is not a valid arch for ${{ matrix.addon }}, skipping build";
+              echo "build_arch=false" >> $GITHUB_OUTPUT;
+            fi
           fi
 
       - name: Login to Docker Hub
