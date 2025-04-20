@@ -114,7 +114,7 @@ jobs:
             done
             if [[ "$build_arch" == "true" ]]; then
               echo "build_arch=true" >> $GITHUB_OUTPUT;
-              image=$(echo ${{ steps.info.outputs.image }} | sed "s#{arch}#$current_arch#")
+              image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f2 | sed "s#{arch}#$current_arch#")
               echo "image=$image" >> $GITHUB_OUTPUT;
               if [[ -z "${{ github.head_ref }}" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
                   echo "BUILD_ARGS=" >> $GITHUB_ENV;
@@ -140,8 +140,8 @@ jobs:
           file: ./${{ matrix.addon }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
           tags: |
-            ${{ steps.check.outputs.image }}:latest
-            ${{ steps.check.outputs.image }}:${{ steps.info.outputs.version }}
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ steps.check.outputs.image }}:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ steps.check.outputs.image }}:${{ steps.info.outputs.version }}
           push: ${{ env.BUILD_ARGS != '--test' }}
 
       - name: Login to GitHub Container Registry
