@@ -112,9 +112,9 @@ jobs:
                 break
               fi
             done
-            if $build_arch; then
+            if [[ "$build_arch" == "true" ]]; then
               echo "build_arch=true" >> $GITHUB_OUTPUT;
-              image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f2 | sed 's#{arch}#$current_arch#')
+              image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f2 | sed "s#{arch}#$current_arch#")
               echo "image=$image" >> $GITHUB_OUTPUT;
               if [[ -z "${{ github.head_ref }}" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
                   echo "BUILD_ARGS=" >> $GITHUB_ENV;
