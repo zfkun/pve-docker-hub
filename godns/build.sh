@@ -1,5 +1,5 @@
 IMAGE_NAME=zfkun/amd64-pve-godns
-GODNS_VERSION=3.3.3
+GODNS_VERSION=3.2.3
 GODNS_REPO=https://ghfast.top/https://github.com/TimothyYe/godns
 
 # build latest
