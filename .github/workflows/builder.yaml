@@ -161,5 +161,5 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/${{ steps.check.outputs.image }}:${{ matrix.arch }}
-            ghcr.io/${{ github.repository_owner }}/${{ steps.check.outputs.image }}:latest-${{ matrix.arch }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.check.outputs.image }}:latest
           push: ${{ env.BUILD_ARGS != '--test' }}
