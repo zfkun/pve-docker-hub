@@ -140,8 +140,8 @@ jobs:
           file: ./${{ matrix.addon }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/${{ steps.check.outputs.image }}:latest
             ${{ vars.DOCKERHUB_USERNAME }}/${{ steps.check.outputs.image }}:${{ steps.info.outputs.version }}
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ steps.check.outputs.image }}:latest
           push: ${{ env.BUILD_ARGS != '--test' }}
 
       - name: Login to GitHub Container Registry
@@ -160,6 +160,6 @@ jobs:
           file: ./${{ matrix.addon }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ steps.check.outputs.image }}:${{ matrix.arch }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.check.outputs.image }}:${{ steps.info.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/${{ steps.check.outputs.image }}:latest
           push: ${{ env.BUILD_ARGS != '--test' }}
