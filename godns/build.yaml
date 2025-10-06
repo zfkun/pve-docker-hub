@@ -2,7 +2,7 @@
 image: zfkun/{arch}-pve-godns
 arch:
   - amd64
-version: 3.3.2
+version: 3.3.3
 args:
-  GODNS_VERSION: 3.3.2
+  GODNS_VERSION: 3.3.3
 test: 2
